@@ -33,7 +33,7 @@ impl Game {
                 };
                 print!("{}", ch);
             }
-            println!();
+            print!("\r\n");
         }
     }
 }

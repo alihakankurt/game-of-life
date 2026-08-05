@@ -21,13 +21,9 @@ fn main() -> io::Result<()> {
     let height = 10;
     let mut game = Game::new(width, height, TARGET_FPS);
 
-    // TODO(@alihakankurt): Create a way to set initial game state, maybe read from file or through command-line.
-    game.grid.set(1, 0);
-    game.grid.set(2, 1);
-    game.grid.set(2, 2);
-    game.grid.set(1, 2);
-    game.grid.set(0, 2);
-    game.grid.update();
+    // TODO(@alihakankurt): Read initial state from a file, and construct state to pass.
+    let state = vec![1 << 62, 1 << 61, 1 << 63 | 1 << 62 | 1 << 61, 0, 0, 0, 0, 0, 0, 0];
+    game.set_state(state);
 
     game.run(&mut stdout)?;
 

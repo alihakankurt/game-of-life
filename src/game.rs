@@ -21,6 +21,31 @@ impl Game {
         return Game { grid, fps };
     }
 
+    pub fn set_state(&mut self, state: Vec<usize>) {
+        let bits = size_of::<usize>() << 3;
+        let cnt = (self.grid.width as usize + bits - 1) / bits;
+        assert!(
+            state.len() == cnt * self.grid.height as usize,
+            "argument `state` have less value than expected"
+        );
+
+        for y in 0..self.grid.height {
+            let offset = y as usize * cnt;
+            for x in 0..self.grid.width {
+                let num_idx = offset + (x as usize / bits);
+                let bit_idx = (bits - 1) - (x as usize % bits);
+
+                let bit = (state[num_idx] >> bit_idx) & 0b1;
+                match bit {
+                    0b1 => self.grid.set(x, y),
+                    _ => self.grid.reset(x, y),
+                };
+            }
+        }
+
+        self.grid.update();
+    }
+
     pub fn run(&mut self, stdout: &mut io::Stdout) -> io::Result<()> {
         let mut running = true;
         let frame_time = Duration::from_secs_f64(1.0 / self.fps as f64);

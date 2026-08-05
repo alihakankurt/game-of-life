@@ -1,5 +1,5 @@
 use std::{
-    io,
+    io::{self, Write},
     time::{Duration, Instant},
 };
 
@@ -11,7 +11,7 @@ use crossterm::{
 use crate::Grid;
 
 pub struct Game {
-    pub grid: Grid,
+    grid: Grid,
     pub fps: u32,
 }
 
@@ -50,16 +50,12 @@ impl Game {
         let mut running = true;
         let frame_time = Duration::from_secs_f64(1.0 / self.fps as f64);
 
-        execute!(stdout, MoveToRow(0), MoveToColumn(0))?;
-        self.render();
-
+        self.render(stdout)?;
         while running {
             let start_time = Instant::now();
 
             self.update();
-
-            execute!(stdout, MoveToRow(0), MoveToColumn(0))?;
-            self.render();
+            self.render(stdout)?;
 
             while event::poll(Duration::from_millis(0))? {
                 if let event::Event::Key(key_event) = event::read()? {
@@ -95,16 +91,20 @@ impl Game {
         self.grid.update();
     }
 
-    fn render(&self) {
+    fn render(&self, stdout: &mut io::Stdout) -> io::Result<()> {
+        execute!(stdout, MoveToRow(0), MoveToColumn(0))?;
+
         for y in 0..self.grid.height {
             for x in 0..self.grid.width {
                 let ch = match self.grid.get(x, y) {
                     0b1 => "#",
                     _ => ".",
                 };
-                print!("{}", ch);
+                write!(stdout, "{}", ch)?;
             }
-            print!("\r\n");
+            write!(stdout, "\r\n")?;
         }
+
+        return Ok(());
     }
 }

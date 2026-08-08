@@ -12,17 +12,17 @@ use crate::Grid;
 
 pub struct Game {
     grid: Grid,
-    pub fps: u32,
+    pub fps: f64,
 }
 
 impl Game {
-    pub fn new(grid: Grid, fps: u32) -> Self {
+    pub fn new(grid: Grid, fps: f64) -> Self {
         return Game { grid, fps };
     }
 
     pub fn run(&mut self, stdout: &mut io::Stdout) -> io::Result<()> {
         let mut running = true;
-        let frame_time = Duration::from_secs_f64(1.0 / self.fps as f64);
+        let frame_time = Duration::from_secs_f64(1.0f64 / self.fps);
 
         self.render(stdout)?;
         while running {

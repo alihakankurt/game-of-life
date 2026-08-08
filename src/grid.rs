@@ -1,29 +1,29 @@
 pub struct Grid {
-    pub width: u32,
-    pub height: u32,
+    pub width: usize,
+    pub height: usize,
     data: Vec<u8>,
 }
 
 impl Grid {
-    pub fn new(width: u32, height: u32) -> Self {
+    pub fn new(width: usize, height: usize) -> Self {
         Grid {
             width,
             height,
-            data: vec![0; (width * height) as usize],
+            data: vec![0u8; width * height],
         }
     }
 
-    pub fn get(&self, x: u32, y: u32) -> u8 {
+    pub fn get(&self, x: usize, y: usize) -> u8 {
         let index = self.calculate_index(x, y);
         return self.data[index] & 0x01;
     }
 
-    pub fn set(&mut self, x: u32, y: u32) {
+    pub fn set(&mut self, x: usize, y: usize) {
         let index = self.calculate_index(x, y);
         self.data[index] |= 0x2;
     }
 
-    pub fn reset(&mut self, x: u32, y: u32) {
+    pub fn reset(&mut self, x: usize, y: usize) {
         let index = self.calculate_index(x, y);
         self.data[index] &= !0x2;
     }
@@ -34,7 +34,7 @@ impl Grid {
         }
     }
 
-    pub fn count(&self, x: u32, y: u32) -> u8 {
+    pub fn count(&self, x: usize, y: usize) -> u8 {
         let x_left = if x == 0 { self.width - 1 } else { x - 1 };
         let x_right = if x == self.width - 1 { 0 } else { x + 1 };
 
@@ -48,8 +48,8 @@ impl Grid {
         return neighbors;
     }
 
-    fn calculate_index(&self, x: u32, y: u32) -> usize {
-        return (y * self.width + x) as usize;
+    fn calculate_index(&self, x: usize, y: usize) -> usize {
+        return y * self.width + x;
     }
 }
 

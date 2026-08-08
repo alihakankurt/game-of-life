@@ -56,11 +56,17 @@ fn main() -> io::Result<()> {
     }
 
     let args = Args::parse();
-    let mut game = Game::new(args.width, args.height, args.fps);
 
     // TODO(@alihakankurt): Read initial state from a file, and construct state to pass.
-    let state = vec![1 << 62, 1 << 61, 1 << 63 | 1 << 62 | 1 << 61, 0, 0, 0, 0, 0, 0, 0];
-    game.set_state(state);
+    let mut grid = Grid::new(args.width, args.height);
+    grid.set(1, 0);
+    grid.set(2, 1);
+    grid.set(0, 2);
+    grid.set(1, 2);
+    grid.set(2, 2);
+    grid.update();
+
+    let mut game = Game::new(grid, args.fps);
 
     execute!(stdout, EnterAlternateScreen, Hide)?;
     enable_raw_mode()?;

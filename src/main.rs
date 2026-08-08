@@ -10,6 +10,7 @@ use crossterm::{
 pub use game::Game;
 pub use grid::Grid;
 use std::{
+    fs,
     io::{self, IsTerminal},
     panic,
     process::exit,
@@ -34,6 +35,10 @@ struct Args {
     /// The target fps to run.
     #[arg(long, value_parser = clap::value_parser!(u32).range(1..), default_value_t = 20)]
     fps: u32,
+
+    /// The file path to initial state.
+    #[arg(short = 'f', long)]
+    file: String,
 }
 
 fn initialize_panic_handler() {
@@ -57,13 +62,25 @@ fn main() -> io::Result<()> {
 
     let args = Args::parse();
 
-    // TODO(@alihakankurt): Read initial state from a file, and construct state to pass.
+    let contents = fs::read_to_string(args.file)?;
+
     let mut grid = Grid::new(args.width, args.height);
-    grid.set(1, 0);
-    grid.set(2, 1);
-    grid.set(0, 2);
-    grid.set(1, 2);
-    grid.set(2, 2);
+    for (y, line) in contents.lines().enumerate() {
+        if y >= args.height as usize {
+            break;
+        }
+
+        for (x, ch) in line.chars().enumerate() {
+            if x >= args.width as usize {
+                break;
+            }
+
+            if ch == '#' {
+                grid.set(x as u32, y as u32);
+            }
+        }
+    }
+
     grid.update();
 
     let mut game = Game::new(grid, args.fps);

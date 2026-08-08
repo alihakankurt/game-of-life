@@ -1,6 +1,7 @@
 mod game;
 mod grid;
 
+use clap::Parser;
 use crossterm::{
     cursor::{Hide, Show},
     execute,
@@ -13,6 +14,27 @@ use std::{
     panic,
     process::exit,
 };
+
+#[derive(clap::Parser)]
+#[command(version, about, long_about = None)]
+#[command(disable_help_flag = true)]
+struct Args {
+    /// Print help message.
+    #[arg(long, action = clap::ArgAction::Help)]
+    help: Option<bool>,
+
+    /// The width of the grid.
+    #[arg(short = 'w', long, value_parser = clap::value_parser!(u32).range(3..))]
+    width: u32,
+
+    /// The height of the grid.
+    #[arg(short = 'h', long, value_parser = clap::value_parser!(u32).range(3..))]
+    height: u32,
+
+    /// The target fps to run.
+    #[arg(long, value_parser = clap::value_parser!(u32).range(1..), default_value_t = 20)]
+    fps: u32,
+}
 
 fn initialize_panic_handler() {
     let original_hook = panic::take_hook();
@@ -33,20 +55,17 @@ fn main() -> io::Result<()> {
         exit(1);
     }
 
-    execute!(stdout, EnterAlternateScreen, Hide)?;
-    enable_raw_mode()?;
-
-    initialize_panic_handler();
-
-    // TODO(@alihakankurt): Update target FPS, width & height etc. as command-line options.
-    const TARGET_FPS: u32 = 20;
-    let width = 10;
-    let height = 10;
-    let mut game = Game::new(width, height, TARGET_FPS);
+    let args = Args::parse();
+    let mut game = Game::new(args.width, args.height, args.fps);
 
     // TODO(@alihakankurt): Read initial state from a file, and construct state to pass.
     let state = vec![1 << 62, 1 << 61, 1 << 63 | 1 << 62 | 1 << 61, 0, 0, 0, 0, 0, 0, 0];
     game.set_state(state);
+
+    execute!(stdout, EnterAlternateScreen, Hide)?;
+    enable_raw_mode()?;
+
+    initialize_panic_handler();
 
     game.run(&mut stdout)?;
 

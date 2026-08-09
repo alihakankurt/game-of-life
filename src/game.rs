@@ -22,30 +22,22 @@ impl Game {
 
     pub fn run(&mut self, stdout: &mut io::Stdout) -> io::Result<()> {
         let mut running = true;
-        let frame_time = Duration::from_secs_f64(1.0f64 / self.fps);
+        let target_frame_duration = Duration::from_secs_f64(1.0f64 / self.fps);
 
         self.render(stdout)?;
         while running {
-            let start_time = Instant::now();
+            let frame_start_time = Instant::now();
 
             self.update();
             self.render(stdout)?;
 
-            while event::poll(Duration::from_millis(0))? {
+            while event::poll(target_frame_duration.saturating_sub(frame_start_time.elapsed()))? {
                 if let event::Event::Key(key_event) = event::read()? {
-                    match key_event.code {
-                        event::KeyCode::Esc => {
-                            running = false;
-                            break;
-                        }
-                        _ => {}
+                    if key_event.code == event::KeyCode::Esc {
+                        running = false;
+                        break;
                     }
                 }
-            }
-
-            let current_frame_time = start_time.elapsed();
-            if current_frame_time < frame_time {
-                std::thread::sleep(frame_time - current_frame_time);
             }
         }
 
